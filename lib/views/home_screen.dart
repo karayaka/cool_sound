@@ -51,6 +51,9 @@ class HomeScreen extends StatelessWidget {
           ],
           initialActiveIndex: 1,
           onTap: (int i) =>{
+            if(i==0){
+              controller.showIterstitialAd()
+            },
             controller.changePage(i)
           } ,
         ),
@@ -93,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                   child: IconButton(
                     icon:Obx((){
                       return Icon((!controller.nute.value
-                      )?Icons.volume_off:Icons.volume_up);
+                      )?Icons.volume_up:Icons.volume_off);
                     }),
                     onPressed: (){
                       controller.nuteAllSound();
@@ -126,7 +129,6 @@ class HomeScreen extends StatelessWidget {
               onSelected:_popupSelection,
               itemBuilder: _buildPopupMenuContext,
             ),
-
           )
         ],
       ),
@@ -166,6 +168,7 @@ class HomeScreen extends StatelessWidget {
                             color: Colors.black
                           ),),
                           onTap: (){
+                            Get.back();
                             controller.stopSound(item.playerId);
                           },
                         ),
@@ -177,8 +180,6 @@ class HomeScreen extends StatelessWidget {
                               controller.setVolume(item.playerId,(val/100));
                             },
                           )
-
-
                         ),
                       ],
                     ),

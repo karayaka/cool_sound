@@ -35,19 +35,29 @@ class HomeController extends GetxController {
 
 
   late BannerAd bottomBannerAd;
+  late BannerAd inlineBannerAd;
+  InterstitialAd? interstitialAd;
+
+  int interstitialAdError=0;
+
   var bottomBannerAdLoaded=false.obs;
+  var inlineBannerAdLoaded=false.obs;
 
   Timer? _timer;
 
   @override
   void onInit(){
     _createBootomBannerAd();
+    _createinlineBannerAd();
+    _createInterstitialAd();
     super.onInit();
   }
 
   @override
   void onClose(){
     bottomBannerAd.dispose();
+    inlineBannerAd.dispose();
+    interstitialAd?.dispose();
     super.onClose();
   }
 
@@ -93,6 +103,7 @@ class HomeController extends GetxController {
     }
     players.clear();
   }
+
   nuteAllSound(){
     for(var item in players){
       final player=AudioPlayer(playerId:item.playerSoundId);
@@ -111,6 +122,7 @@ class HomeController extends GetxController {
     bottomBannerAd=BannerAd(
       size: AdSize.banner,
       adUnitId: AdsHelper.bannerAdUnitId,
+      request: AdRequest(),
       listener: BannerAdListener(
           onAdLoaded: (_){
             bottomBannerAdLoaded(true);
@@ -119,9 +131,60 @@ class HomeController extends GetxController {
             ad.dispose();
           }
       ),
-      request: AdRequest(),
+
     );
     bottomBannerAd.load();
+  }
+
+  void _createinlineBannerAd(){
+    inlineBannerAd=BannerAd(
+      adUnitId: AdsHelper.inlineAdUnitId,
+      size: AdSize(width: (Get.size.width*0.5).toInt(),height:(Get.size.width*0.5).toInt()),
+      request:AdRequest(),
+      listener: BannerAdListener(
+          onAdLoaded: (_){
+            inlineBannerAdLoaded(true);
+          },
+          onAdFailedToLoad: (ad,error){
+            ad.dispose();
+          }
+    )
+    );
+    inlineBannerAd.load();
+  }
+
+  void _createInterstitialAd(){
+    InterstitialAd.load(
+      adUnitId: AdsHelper.InterstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad){
+          interstitialAd=ad;
+          interstitialAdError=0;
+        }, onAdFailedToLoad: (LoadAdError error){
+        interstitialAdError++;
+        interstitialAd=null;
+        if(interstitialAdError<=3){
+          _createInterstitialAd();
+        }
+
+      })
+    );
+  }
+  void showIterstitialAd(){
+    if(interstitialAd!=null){
+      interstitialAd!.fullScreenContentCallback=FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (InterstitialAd ad){
+          ad.dispose();
+          _createInterstitialAd();
+        },
+        onAdFailedToShowFullScreenContent: (InterstitialAd ad,AdError error){
+          ad.dispose();
+          _createInterstitialAd();
+        }
+      );
+      interstitialAd!.show();
+    }
   }
 
   void setTimer(int time){
@@ -140,6 +203,7 @@ class HomeController extends GetxController {
       }
     });
   }
+
   void stopTimer(){
     timerWork(false);
     currrentSeconds.value=0;

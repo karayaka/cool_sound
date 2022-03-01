@@ -3,6 +3,7 @@ import 'package:cool_sound/views/components/player_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class SwingingInstrument extends StatelessWidget {
   //tekno haraketli
@@ -91,21 +92,23 @@ class SwingingInstrument extends StatelessWidget {
             },
           ),
           ),
-          /*Obx(() =>PlayerCardWidget(
-            isPlay:controller.jungle.value,
-            cardIcon: Icon(Icons.border_inner_rounded),
-            title: "Jungal",
-            onTab: (val){
-              if(val)
-                controller.playSound("sounds/jungle.mp3",6,Icon(Icons.border_inner_rounded),"Jungal");
-              else
-                controller.stopSound(6);
-            },
-            onPlay: (rate){
-              controller.setVolume(6, rate);
-            },
+          Obx((){
+              if(controller.inlineBannerAdLoaded.value){
+                return Container(
+                  padding: EdgeInsets.only(bottom: 10),
+                  width: controller.inlineBannerAd.size.width.toDouble(),
+                  height: controller.inlineBannerAd.size.height.toDouble(),
+                  child: AdWidget(
+                    ad: controller.inlineBannerAd,
+                  ),
+                );
+              }else{
+                return Container();
+
+              }
+          }
+
           ),
-          ),*/
         ],
       ),
     );
